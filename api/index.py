@@ -26,7 +26,7 @@ def get_all_html_links(url):
     if response.status_code != 200:
         print(f"Failed to access {url}")
         return []
-
+    
     soup = BeautifulSoup(response.text, "html.parser")
     links = []
     for link in soup.find_all("a", href=True):
@@ -53,6 +53,7 @@ def extract_group_numbers(url):
         if match:
             group_num = int(match.group(1))
             group_numbers[group_num] = url
+        
 
     return group_numbers
 
@@ -87,6 +88,8 @@ def fetch_timetable(group_nr: int):
 
     url = available_groups[group_nr]
     response = requests.get(url)
+    print(response.text)
+    print("hi")
     soup = BeautifulSoup(response.text, 'html.parser')
 
     headers = soup.find_all('h1')
@@ -127,6 +130,7 @@ def check_for_changes():
         if new_data and (group_nr not in last_data or last_data[group_nr] != new_data):
             last_data[group_nr] = new_data
             last_checked_time[group_nr] = time.strftime("%Y-%m-%d %H:%M:%S")
+    print("A fetch request has been performed at ", time.strftime("%Y-%m-%d %H:%M:%S"))
 
 
 
@@ -139,13 +143,17 @@ async def get_home():
 
 @app.get("/orar/{grupa}")
 async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
+    if not available_groups:
+        scan_all_pages()
     """Returns the timetable for a given group and triggers background updates."""
     if grupa not in available_groups:
         return {"Grupa": grupa, "Message": "Grupa nu a fost gasita.", "Code": -1}
 
     if grupa not in last_data:
         background_tasks.add_task(check_for_changes)
-        return {"Grupa": grupa, "Message": "Nu exista date disponibile.", "Code": -1}
+        last_data[grupa]=fetch_timetable(grupa)
+        return {"Grupa": grupa, "Message": "Prima rulare.","Orar": json.loads(last_data[grupa]), "Code": -1}
+        
 
     new_data = last_data[grupa]
     last_seen = last_seen_data.get(grupa, "")
@@ -167,6 +175,5 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
 
 if __name__ == '__main__':
     import uvicorn
-    scan_all_pages()
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
