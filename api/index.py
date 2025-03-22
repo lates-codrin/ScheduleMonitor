@@ -68,7 +68,11 @@ def check_for_changes():
             last_checked_time[group_nr] = time.strftime("%Y-%m-%d %H:%M:%S")
 
 
-@app.get("/api/py/orar/{grupa}")
+
+@app.get("/")
+async def get_home():
+    return "Schedule Monitor front page. Try /api/orar/group_number!"
+@app.get("/orar/{grupa}")
 async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     """Returns the timetable and triggers an update in the background."""
     if grupa not in last_data:
