@@ -129,10 +129,7 @@ def check_for_changes():
             last_checked_time[group_nr] = time.strftime("%Y-%m-%d %H:%M:%S")
 
 
-@app.on_event("startup")
-def startup_event():
-    """Scans timetable pages at server startup."""
-    scan_all_pages()
+
 
 
 @app.get("/")
@@ -170,4 +167,6 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
 
 if __name__ == '__main__':
     import uvicorn
+    scan_all_pages()
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
