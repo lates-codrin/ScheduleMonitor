@@ -23,8 +23,19 @@ def fetch_timetable(group_nr: int):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    table_map = {811: 1, 812: 2, 813: 3}
-    table = soup.select_one(f"table:nth-of-type({table_map.get(group_nr, 4)})")
+    headers = soup.find_all('h1')
+    target_header = None
+    
+    for header in headers:
+        if f"Grupa {group_nr}" in header.text:
+            target_header = header
+            break
+
+    if not target_header:
+        print(f"Timetable for group {group_nr} not found.")
+        return None
+
+    table = target_header.find_next('table')
 
     df = pd.DataFrame(columns=['Ziua', 'Orele', 'Sala', 'Frecventa', 'Formatia', 'Tipul', 'Disciplina', 'CD'])
 
@@ -50,16 +61,14 @@ def fetch_timetable(group_nr: int):
 def check_for_changes():
     """Runs in the background, checking for updates."""
     global last_data, last_checked_time
-    for group_nr in [811, 812, 813, 814]:
+    for group_nr in [811, 812, 813, 814, 111,112, 211,212,213,214,215,216,217]:
         new_data = fetch_timetable(group_nr)
         if group_nr not in last_data or last_data[group_nr] != new_data:
             last_data[group_nr] = new_data
             last_checked_time[group_nr] = time.strftime("%Y-%m-%d %H:%M:%S")
 
-@app.get("/")
-async def get_home():
-    return "Schedule Monitor front page. Try /api/orar/group_number!"
-@app.get("/orar/{grupa}")
+
+@app.get("/api/py/orar/{grupa}")
 async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     """Returns the timetable and triggers an update in the background."""
     if grupa not in last_data:
@@ -81,6 +90,7 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
 
     last_seen_data[grupa] = new_data
 
+    # Run update in background without blocking response
     background_tasks.add_task(check_for_changes)
 
     return response_data
