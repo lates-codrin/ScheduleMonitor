@@ -8,7 +8,7 @@ from fastapi import FastAPI, BackgroundTasks
 import re
 
 BASE_URL = "https://webfmi.vercel.app/"
-app = FastAPI(docs_url="/api/py/docs", openapi_url="/api/py/openapi.json")
+app = FastAPI(docs_url="/orar/docs", openapi_url="/orar/openapi.json")
 
 last_data = {}
 last_seen_data = {}
@@ -52,7 +52,7 @@ def extract_group_numbers(url):
         match = re.search(r"Grupa\s*(\d+)", header.text)
         if match:
             group_num = int(match.group(1))
-            group_numbers[group_num] = url  # Map group to its respective page
+            group_numbers[group_num] = url
 
     return group_numbers
 
