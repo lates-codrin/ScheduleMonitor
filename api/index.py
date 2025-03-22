@@ -73,6 +73,10 @@ def scan_all_pages():
 
     available_groups = all_group_numbers
     print("Finished scanning timetable pages.")
+@app.get("/rescan")
+def rescan():
+    scan_all_pages()
+    return {"Message": "Rescan completed.", "Available groups": available_groups}
 
 
 def fetch_timetable(group_nr: int):
@@ -116,6 +120,7 @@ def fetch_timetable(group_nr: int):
 
 def check_for_changes():
     """Runs in the background, checking for timetable updates."""
+    print("I have been called.")
     global last_data, last_checked_time
     for group_nr in available_groups:
         new_data = fetch_timetable(group_nr)
