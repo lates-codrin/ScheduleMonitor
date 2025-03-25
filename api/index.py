@@ -88,8 +88,7 @@ def fetch_timetable(group_nr: int):
 
     url = available_groups[group_nr]
     response = requests.get(url)
-    print(response.text)
-    print("hi")
+
     soup = BeautifulSoup(response.text, 'html.parser')
 
     headers = soup.find_all('h1')
@@ -123,7 +122,6 @@ def fetch_timetable(group_nr: int):
 
 def check_for_changes():
     """Runs in the background, checking for timetable updates."""
-    print("I have been called.")
     global last_data, last_checked_time
     for group_nr in available_groups:
         new_data = fetch_timetable(group_nr)
@@ -159,6 +157,8 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     last_seen = last_seen_data.get(grupa, "")
 
     changes_detected = last_seen and last_seen != new_data
+
+    
 
     response_data = {
         "Grupa": grupa,
