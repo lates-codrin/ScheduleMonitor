@@ -117,6 +117,7 @@ async def get_home():
 async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     if not available_groups:
         scan_all_pages()
+        check_for_changes()
     
     if grupa not in available_groups:
         return {"Grupa": grupa, "Message": "Grupa nu a fost gasita.", "Code": -1}
