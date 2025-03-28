@@ -97,7 +97,7 @@ def check_for_changes():
         new_data = fetch_timetable(group_nr)
         if new_data and (group_nr not in last_data or last_data[group_nr] != new_data):
             print(f"Changes detected for group {group_nr}:")
-            print_diff(last_data.get(group_nr, ""), new_data)
+            #print_diff(last_data.get(group_nr, ""), new_data)
             last_data[group_nr] = new_data
             last_checked_time[group_nr] = time.strftime("%Y-%m-%d %H:%M:%S")
     print("A fetch request has been performed at", time.strftime("%Y-%m-%d %H:%M:%S"))
@@ -124,7 +124,7 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     changes_detected = last_seen and last_seen != new_data
     
 
-    print_diff(last_seen, new_data)
+    #print_diff(last_seen, new_data)
     
     response_data = {
         "Grupa": grupa,
