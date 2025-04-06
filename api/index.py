@@ -138,6 +138,20 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     background_tasks.add_task(check_for_changes)
     return response_data
 
+@app.get("/news")
+async def get_timetable():
+    
+    
+    response_data = {
+        "articleTitle": 'Mobilitati Erasmus+',
+        "articleDescription": 'Se organizează selecție pentru mobilitățile Erasmus+ de studii pentru anul universitar 2025-2026.',
+        "articleDate":'03.04.2025',
+        "articleLink": 'https://www.cs.ubbcluj.ro/selectie-pentru-mobilitati-erasmus-de-studii-pentru-anul-univ-2025-2026/'
+    }
+    
+    return response_data
+
+
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
