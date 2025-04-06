@@ -139,7 +139,7 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     }
 
     last_seen_data[grupa] = new_data
-    background_tasks.add_task(check_for_changes)  # Schedule a check for next time
+    background_tasks.add_task(check_for_changes)
     return response_data
 
 @app.get("/news")
@@ -183,7 +183,37 @@ async def get_news():
     return articles
 
 
+@app.get("/rooms")
+async def get_rooms():
+    url = "https://www.cs.ubbcluj.ro/files/orar/2024-2/sali/legenda.html"
+    response = requests.get(url)
+    
+    if response.status_code != 200:
+        return {"error": "Failed to fetch rooms"}
 
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+
+    table = soup.find('table', {'border': '1'})
+    
+    if not table:
+        return {"error": "Table not found"}
+
+    rows = table.find_all('tr')[1:]
+
+    rooms = []
+    for row in rows:
+        cols = row.find_all('td')
+        if len(cols) > 1:
+            sala_name = cols[0].get_text(strip=True)
+            sala_location = cols[1].get_text(strip=True)
+
+            rooms.append({
+                "salaName": sala_name,
+                "salaLocation": sala_location
+            })
+
+    return rooms
 
 if __name__ == '__main__':
     import uvicorn
