@@ -168,16 +168,16 @@ async def get_news():
         description_tag = post.find("div", class_="entry")
         full_description = description_tag.get_text(strip=True) if description_tag else ""
 
-        # Try to find image src inside the entry div
         img_tag = description_tag.find("img") if description_tag else None
-        image_url = img_tag.get("src") if img_tag else None
+        image_url = img_tag['src'] if img_tag else 'https://www.cs.ubbcluj.ro/wp-content/uploads/cs-logo.png'
+
 
         articles.append({
             "articleTitle": title,
             "articleDescription": full_description,
             "articleDate": date,
             "articleLink": link,
-            "articleImage": image_url  # Can be None
+            "articleImage": image_url
         })
 
     return articles
