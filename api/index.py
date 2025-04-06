@@ -146,13 +146,20 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
 async def get_timetable():
     
     
-    response_data = {
-        "articleTitle": 'Mobilitati Erasmus+',
-        "articleDescription": 'Se organizează selecție pentru mobilitățile Erasmus+ de studii pentru anul universitar 2025-2026.',
-        "articleDate":'03.04.2025',
-        "articleLink": 'https://www.cs.ubbcluj.ro/selectie-pentru-mobilitati-erasmus-de-studii-pentru-anul-univ-2025-2026/'
-    }
-    
+    response_data = [
+        {
+            "articleTitle": 'Mobilitati Erasmus+',
+            "articleDescription": 'Se organizează selecție pentru mobilitățile Erasmus+ de studii pentru anul universitar 2025-2026.',
+            "articleDate": '03.04.2025',
+            "articleLink": 'https://www.cs.ubbcluj.ro/selectie-pentru-mobilitati-erasmus-de-studii-pentru-anul-univ-2025-2026/'
+        },
+        {
+            "articleTitle": 'Deadline Proiecte',
+            "articleDescription": 'Reamintim studenților că termenul limită pentru predarea proiectelor este 10.04.2025.',
+            "articleDate": '05.04.2025',
+            "articleLink": 'https://www.cs.ubbcluj.ro/deadline-proiecte-aprilie-2025/'
+        }
+    ]
     return response_data
 
 
