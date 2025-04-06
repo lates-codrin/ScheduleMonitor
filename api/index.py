@@ -144,7 +144,7 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
 
 @app.get("/news")
 async def get_news():
-    url = "https://www.cs.ubbcluj.ro/anunturi/anunturi-studenti/"
+    url = "https://webfmi.vercel.app/anunturi.html"
     response = requests.get(url)
     if response.status_code != 200:
         return {"error": "Failed to fetch news"}
@@ -169,7 +169,7 @@ async def get_news():
         full_description = description_tag.get_text(strip=True) if description_tag else ""
 
         img_tag = description_tag.find("img") if description_tag else None
-        image_url = img_tag['src'] if img_tag else 'https://www.cs.ubbcluj.ro/wp-content/uploads/cs-logo.png'
+        image_url = img_tag['src'] if img_tag else 'https://webfmi.vercel.app/cslogo.png'
 
 
         articles.append({
@@ -185,7 +185,7 @@ async def get_news():
 
 @app.get("/rooms")
 async def get_rooms():
-    url = "https://www.cs.ubbcluj.ro/files/orar/2024-2/sali/legenda.html"
+    url = "https://webfmi.vercel.app/legenda.html"
     response = requests.get(url)
     
     if response.status_code != 200:
