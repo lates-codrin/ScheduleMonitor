@@ -92,15 +92,22 @@ def fetch_timetable(group_nr: int):
     return df.to_json(orient="records")
 
 def check_for_changes():
-    global last_data, last_checked_time
+    global last_data, last_checked_time, last_seen_data
+
     for group_nr in available_groups:
         new_data = fetch_timetable(group_nr)
-        if new_data and (group_nr not in last_data or last_data[group_nr] != new_data):
-            print(f"Changes detected for group {group_nr}:")
-            print_diff(last_data.get(group_nr, ""), new_data)
+
+        if new_data:
+            if group_nr not in last_data:
+                print(f"Initial data fetched for group {group_nr}")
+            elif last_data[group_nr] != new_data:
+                print(f"Changes detected for group {group_nr}")
+            
             last_data[group_nr] = new_data
             last_checked_time[group_nr] = time.strftime("%Y-%m-%d %H:%M:%S")
+    
     print("A fetch request has been performed at", time.strftime("%Y-%m-%d %H:%M:%S"))
+
 
 @app.get("/")
 async def get_home():
@@ -113,29 +120,26 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     
     if grupa not in available_groups:
         return {"Grupa": grupa, "Message": "Grupa nu a fost gasita.", "Code": -1}
-    
+
+    # Ensure we have at least one scan before returning a response
     if grupa not in last_data:
         background_tasks.add_task(check_for_changes)
-        last_data[grupa] = fetch_timetable(grupa)
-        return {"Grupa": grupa, "Message": "Prima rulare.", "Orar": json.loads(last_data[grupa]), "Code": -1}
+        return {"Grupa": grupa, "Message": "In curs de verificare...", "Code": -1}
     
-    new_data = last_data[grupa]
+    new_data = last_data.get(grupa, "")
     last_seen = last_seen_data.get(grupa, "")
     changes_detected = last_seen and last_seen != new_data
-    
-
-    print_diff(last_seen, new_data)
     
     response_data = {
         "Grupa": grupa,
         "Message": "Modificari gasite!" if changes_detected else "Nu exista modificari.",
         "Ultima verificare": last_checked_time.get(grupa, "N/A"),
-        "Orar": json.loads(new_data),
+        "Orar": json.loads(new_data) if new_data else [],
         "Code": 1 if changes_detected else 0
     }
-    
+
     last_seen_data[grupa] = new_data
-    background_tasks.add_task(check_for_changes)
+    background_tasks.add_task(check_for_changes)  # Schedule a check for next time
     return response_data
 
 @app.get("/news")
