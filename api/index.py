@@ -169,7 +169,7 @@ async def get_news():
         full_description = description_tag.get_text(strip=True) if description_tag else ""
 
         img_tag = description_tag.find("img") if description_tag else None
-        image_url = img_tag['src'] if img_tag else 'https://webfmi.vercel.app/cslogo.png'
+        image_url = 'https://webfmi.vercel.app/'+img_tag['src'].replace('.','') if img_tag else 'https://webfmi.vercel.app/cslogo.png'
 
 
         articles.append({
