@@ -155,7 +155,6 @@ async def get_news():
     articles = []
 
     for post in post_elements:
-        # Get title and link
         title_tag = post.find("h2", class_="title").find("a")
         if not title_tag:
             continue
@@ -163,22 +162,26 @@ async def get_news():
         title = title_tag.get_text(strip=True)
         link = title_tag.get("href")
 
-        # Get date
         date_tag = post.find("span", class_="meta_date")
         date = date_tag.get_text(strip=True) if date_tag else "N/A"
 
-        # Get description
         description_tag = post.find("div", class_="entry")
-        description = description_tag.get_text(strip=True) if description_tag else ""
+        full_description = description_tag.get_text(strip=True) if description_tag else ""
+
+        # Try to find image src inside the entry div
+        img_tag = description_tag.find("img") if description_tag else None
+        image_url = img_tag.get("src") if img_tag else None
 
         articles.append({
             "articleTitle": title,
-            "articleDescription": description,
+            "articleDescription": full_description,
             "articleDate": date,
-            "articleLink": link
+            "articleLink": link,
+            "articleImage": image_url  # Can be None
         })
 
     return articles
+
 
 
 
