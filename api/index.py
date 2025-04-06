@@ -143,102 +143,43 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     return response_data
 
 @app.get("/news")
-async def get_timetable():
-    
-    
-    response_data = [
-    {
-        "articleTitle": "Sesiune de Admitere Master",
-        "articleDescription": "Încep înscrierile pentru programele de masterat, sesiunea de toamnă 2025.",
-        "articleDate": "15.08.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/admitere-master-toamna-2025/"
-    },
-    {
-        "articleTitle": "Conferință Internațională de Informatică",
-        "articleDescription": "Universitatea organizează o conferință internațională cu tema 'Inteligența Artificială în secolul XXI'.",
-        "articleDate": "20.09.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/conferinta-internationala-informatica-2025/"
-    },
-    {
-        "articleTitle": "Burse de Excelență",
-        "articleDescription": "Se anunță deschiderea sesiunii de aplicare pentru bursele de excelență academică.",
-        "articleDate": "01.10.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/burse-excelenta-2025/"
-    },
-        {
-        "articleTitle": "Workshop Programare Avansată",
-        "articleDescription": "Studenții sunt invitați la un workshop intensiv de programare avansată în C++.",
-        "articleDate": "10.10.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/workshop-programare-avansata-c-plus-plus/"
-    },
-    {
-        "articleTitle": "Sesiune de Comunicări Științifice Studențești",
-        "articleDescription": "Studenții sunt invitați să-și prezinte lucrările de cercetare în cadrul sesiunii anuale.",
-        "articleDate": "25.10.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/sesiune-comunicari-stiintifice-studentesti-2025/"
-    },
-    {
-        "articleTitle": "Hackathon UBB",
-        "articleDescription": "Se lansează ediția din acest an a hackathonului organizat de universitate.",
-        "articleDate": "05.11.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/hackathon-ubb-2025/"
-    },
-    {
-        "articleTitle": "Ziua Porților Deschise",
-        "articleDescription": "Viitorii studenți sunt invitați să viziteze facultatea în cadrul evenimentului anual.",
-        "articleDate": "15.11.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/ziua-portilor-deschise-2025/"
-    },
-    {
-        "articleTitle": "Sesiune de Examene Restanțe",
-        "articleDescription": "Se anunță perioada de desfășurare a sesiunii de examene restanțe.",
-        "articleDate": "01.12.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/sesiune-examene-restante-decembrie-2025/"
-    },
-    {
-        "articleTitle": "Atelier de Robotică",
-        "articleDescription": "Studenții sunt invitați să participe la un atelier practic de robotică.",
-        "articleDate": "10.12.2025",
-        "articleLink": "https://www.cs.ubbcluj.ro/atelier-robotica-2025/"
-    },
-        {
-        "articleTitle": "Deadline Lucrări de Licență",
-        "articleDescription": "Reamintim studenților că termenul limită pentru predarea lucrărilor de licență este 15.01.2026.",
-        "articleDate": "12.01.2026",
-        "articleLink": "https://www.cs.ubbcluj.ro/deadline-lucrari-licenta-ianuarie-2026/"
-    },
-    {
-        "articleTitle": "Sesiune de Examene Licență",
-        "articleDescription": "Se anunță perioada de desfășurare a sesiunii de examene de licență.",
-        "articleDate": "20.01.2026",
-        "articleLink": "https://www.cs.ubbcluj.ro/sesiune-examene-licenta-ianuarie-2026/"
-    },
-    {
-        "articleTitle": "Program de Internship",
-        "articleDescription": "Se deschide sesiunea de înscrieri pentru un program de internship în cadrul unei companii partenere.",
-        "articleDate": "01.02.2026",
-        "articleLink": "https://www.cs.ubbcluj.ro/program-internship-februarie-2026/"
-    },
-    {
-        "articleTitle": "Concurs de Programare",
-        "articleDescription": "Studenții sunt invitați să participe la un concurs de programare cu premii atractive.",
-        "articleDate": "10.02.2026",
-        "articleLink": "https://www.cs.ubbcluj.ro/concurs-programare-2026/"
-    },
-        {
-        "articleTitle": "Sesiune de Admitere Licență",
-        "articleDescription": "Încep înscrierile pentru programele de licență, sesiunea de vară 2026.",
-        "articleDate": "15.07.2026",
-        "articleLink": "https://www.cs.ubbcluj.ro/admitere-licenta-vara-2026/"
-    },
-    {
-        "articleTitle": "Deadline Proiecte Restanțe",
-        "articleDescription": "Reamintim studenților că termenul limită pentru predarea proiectelor restanțe este 10.08.2026.",
-        "articleDate": "05.08.2026",
-        "articleLink": "https://www.cs.ubbcluj.ro/deadline-proiecte-restante-august-2026/"
-    }
-]
-    return response_data
+async def get_news():
+    url = "https://www.cs.ubbcluj.ro/anunturi/anunturi-studenti/"
+    response = requests.get(url)
+    if response.status_code != 200:
+        return {"error": "Failed to fetch news"}
+
+    soup = BeautifulSoup(response.text, 'html.parser')
+    post_elements = soup.find_all("div", class_="post-box")
+
+    articles = []
+
+    for post in post_elements:
+        # Get title and link
+        title_tag = post.find("h2", class_="title").find("a")
+        if not title_tag:
+            continue
+
+        title = title_tag.get_text(strip=True)
+        link = title_tag.get("href")
+
+        # Get date
+        date_tag = post.find("span", class_="meta_date")
+        date = date_tag.get_text(strip=True) if date_tag else "N/A"
+
+        # Get description
+        description_tag = post.find("div", class_="entry")
+        description = description_tag.get_text(strip=True) if description_tag else ""
+
+        articles.append({
+            "articleTitle": title,
+            "articleDescription": description,
+            "articleDate": date,
+            "articleLink": link
+        })
+
+    return articles
+
 
 
 if __name__ == '__main__':
