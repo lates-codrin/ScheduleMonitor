@@ -8,7 +8,7 @@ from fastapi import FastAPI, BackgroundTasks
 import re
 import difflib
 
-BASE_URL = "https://webfmi.vercel.app/"
+BASE_URL = "https://www.cs.ubbcluj.ro/files/orar/2024-2/tabelar/index.html"
 app = FastAPI(docs_url="/orar/docs", openapi_url="/orar/openapi.json")
 
 last_data = {}
