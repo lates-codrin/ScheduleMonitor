@@ -48,7 +48,7 @@ http://localhost:8000/orar/docs || https://schedulemonitor.onrender.com/orar/doc
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/schedule-monitor-api.git
+git clone https://github.com/lates-codrin/ScheduleMonitor.git
 cd schedule-monitor-api
 
 # Create a virtual environment and activate it
