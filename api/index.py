@@ -121,7 +121,6 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
     if grupa not in available_groups:
         return {"Grupa": grupa, "Message": "Grupa nu a fost gasita.", "Code": -1}
 
-    # Ensure we have at least one scan before returning a response
     if grupa not in last_data:
         background_tasks.add_task(check_for_changes)
         return {"Grupa": grupa, "Message": "In curs de verificare...", "Code": -1}
