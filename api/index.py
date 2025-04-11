@@ -8,7 +8,7 @@ from fastapi import FastAPI, BackgroundTasks
 import re
 import difflib
 
-BASE_URL = "https://webfmi.vercel.app/"
+BASE_URL = "https://www.cs.ubbcluj.ro/files/orar/2024-2/tabelar/index.html"
 app = FastAPI(docs_url="/orar/docs", openapi_url="/orar/openapi.json")
 
 last_data = {}
@@ -143,7 +143,7 @@ async def get_timetable(grupa: int, background_tasks: BackgroundTasks):
 
 @app.get("/news")
 async def get_news():
-    url = "https://webfmi.vercel.app/anunturi.html"
+    url = "https://www.cs.ubbcluj.ro/anunturi/anunturi-studenti/"
     response = requests.get(url)
     if response.status_code != 200:
         return {"error": "Failed to fetch news"}
