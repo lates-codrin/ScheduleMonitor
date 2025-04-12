@@ -1,14 +1,17 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from api.services.fetcher import extract_group_links, get_html
 from api.services.parser import parse_timetable_from_url, parse_news, parse_rooms
 
 from .config import *
 
 app = FastAPI(docs_url="/orar/docs", openapi_url="/orar/openapi.json")
+templates = Jinja2Templates(directory="templates")
 
-@app.get("/")
-def home():
-    return {"message": "Schedule Monitor API. Try /orar/{group_number}, /news or /rooms."}
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/orar/{grupa}")
 def get_timetable(grupa: int):
