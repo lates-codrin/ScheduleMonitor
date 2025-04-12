@@ -3,3 +3,4 @@ fastapi==0.115.11
 pandas==2.2.3
 Requests==2.32.3
 uvicorn==0.34.0
+Jinja2==3.1.4
