@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from bs4 import BeautifulSoup
@@ -57,21 +57,40 @@ session_store = {}
 
 @app.post("/start-login")
 def start_login(user_id: str):
-    session = requests.Session()
-    login_url = "https://academicinfo.ubbcluj.ro/Default.aspx"
-    resp = session.get(login_url)
-    soup = BeautifulSoup(resp.text, 'html.parser')
+    try:
+        session = requests.Session()
+        login_url = "https://academicinfo.ubbcluj.ro/Default.aspx"
+        
+        resp = session.get(login_url)
+        
+        if resp.status_code != 200:
+            raise HTTPException(status_code=500, detail="Failed to fetch the login page.")
+        
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        
+        recaptcha_div = soup.find("div", class_="g-recaptcha")
+        if recaptcha_div is None:
+            raise HTTPException(status_code=400, detail="ReCAPTCHA sitekey not found.")
+        
+        sitekey = recaptcha_div.get("data-sitekey")
+        if not sitekey:
+            raise HTTPException(status_code=400, detail="ReCAPTCHA sitekey is missing.")
+        
+        viewstate = soup.find("input", {"name": "__VIEWSTATE"})["value"]
+        eventvalidation = soup.find("input", {"name": "__EVENTVALIDATION"})["value"]
+        viewstategen = soup.find("input", {"name": "__VIEWSTATEGENERATOR"})["value"]
+        
+        session_store[user_id] = {
+            "session": session,
+            "viewstate": viewstate,
+            "eventvalidation": eventvalidation,
+            "viewstategen": viewstategen
+        }
+        
+        return JSONResponse(content={"sitekey": sitekey})
 
-    sitekey = soup.find("div", class_="g-recaptcha")["data-sitekey"]
-
-    session_store[user_id] = {
-        "session": session,
-        "viewstate": soup.find("input", {"name": "__VIEWSTATE"})["value"],
-        "eventvalidation": soup.find("input", {"name": "__EVENTVALIDATION"})["value"],
-        "viewstategen": soup.find("input", {"name": "__VIEWSTATEGENERATOR"})["value"]
-    }
-
-    return JSONResponse(content={"sitekey": sitekey})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/solve-captcha")
