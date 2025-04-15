@@ -86,7 +86,7 @@ def start_login(user_id: str):
             "eventvalidation": eventvalidation,
             "viewstategen": viewstategen
         }
-        
+        print(session_store[user_id])
         return JSONResponse(content={"sitekey": sitekey})
 
     except Exception as e:
