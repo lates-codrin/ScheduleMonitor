@@ -1,13 +1,21 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from bs4 import BeautifulSoup
+import requests
+import os
+from dotenv import load_dotenv
+
 from api.services.fetcher import extract_group_links, get_html
 from api.services.parser import parse_timetable_from_url, parse_news, parse_rooms
-
 from .config import *
+
+load_dotenv()
 
 app = FastAPI(docs_url="/orar/docs", openapi_url="/orar/openapi.json")
 templates = Jinja2Templates(directory="templates")
+
+# ==================== STATIC ROUTES ====================
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -18,7 +26,7 @@ def get_timetable(grupa: int):
     groups = extract_group_links()
     if grupa not in groups:
         return {"Grupa": grupa, "Message": "Grupa nu a fost gasita.", "Code": -1}
-    
+
     data = parse_timetable_from_url(groups[grupa], grupa)
     return {
         "Grupa": grupa,
@@ -41,3 +49,69 @@ def get_rooms():
         return parse_rooms(html)
     except Exception as e:
         return {"error": str(e)}
+
+# ==================== LOGIN FLOW ====================
+# Temporary Patch ; @15.04.2025 Iter1 ## Author: Codrin-Gabriel Lates
+
+session_store = {}
+
+@app.post("/start-login")
+def start_login(user_id: str):
+    session = requests.Session()
+    login_url = "https://academicinfo.ubbcluj.ro/Default.aspx"
+    resp = session.get(login_url)
+    soup = BeautifulSoup(resp.text, 'html.parser')
+
+    sitekey = soup.find("div", class_="g-recaptcha")["data-sitekey"]
+
+    session_store[user_id] = {
+        "session": session,
+        "viewstate": soup.find("input", {"name": "__VIEWSTATE"})["value"],
+        "eventvalidation": soup.find("input", {"name": "__EVENTVALIDATION"})["value"],
+        "viewstategen": soup.find("input", {"name": "__VIEWSTATEGENERATOR"})["value"]
+    }
+
+    return JSONResponse(content={"sitekey": sitekey})
+
+
+@app.post("/solve-captcha")
+def solve_captcha(user_id: str, username: str, password: str, captcha_response: str):
+    store = session_store.get(user_id)
+    if not store:
+        return JSONResponse(content={"error": "Session expired"}, status_code=400)
+
+    session = store["session"]
+    data = {
+        "__VIEWSTATE": store["viewstate"],
+        "__EVENTVALIDATION": store["eventvalidation"],
+        "__VIEWSTATEGENERATOR": store["viewstategen"],
+        "txtUsername": username,
+        "txtPassword": password,
+        "g-recaptcha-response": captcha_response,  # jus pass it to the uni
+        "btnLogin": "Log in"
+    }
+
+    login_resp = session.post("https://academicinfo.ubbcluj.ro/Default.aspx", data=data)
+    if "Note.aspx" not in login_resp.text and "Note" not in login_resp.url:
+        return JSONResponse(content={"error": "Login failed"}, status_code=401)
+
+    grades_resp = session.get("https://academicinfo.ubbcluj.ro/Note.aspx")
+    soup = BeautifulSoup(grades_resp.content, 'html.parser')
+    table = soup.find("table", {"id": "ctl00_ContentPlaceHolder1_gvNote"})
+    rows = table.find("tbody").find_all("tr")
+
+    grades = []
+    for row in rows:
+        cols = row.find_all("td")
+        grades.append({
+            "Nr Crt": cols[0].text.strip(),
+            "An studiu": cols[1].text.strip(),
+            "Semestru plan": cols[2].text.strip(),
+            "Cod disciplina": cols[3].text.strip(),
+            "Disciplina": cols[4].text.strip(),
+            "Nota": cols[5].text.strip(),
+            "Credite": cols[6].text.strip(),
+            "Data promovarii": cols[7].text.strip()
+        })
+
+    return JSONResponse(content=grades)
