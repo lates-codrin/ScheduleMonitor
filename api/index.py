@@ -56,7 +56,8 @@ def get_rooms():
 session_store = {}
 
 @app.post("/start-login")
-def start_login(user_id: str):
+def start_login(user_id):
+    print(user_id)
     try:
         session = requests.Session()
         login_url = "https://academicinfo.ubbcluj.ro/Default.aspx"
