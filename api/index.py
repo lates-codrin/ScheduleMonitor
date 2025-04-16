@@ -123,7 +123,7 @@ def solve_captcha(user_id: str, username: str, password: str, captcha_response: 
     if "Note.aspx" not in login_resp.text and "Note" not in login_resp.url:
         return JSONResponse(content={"error": "Login failed"}, status_code=401)
 
-    grades_resp = session.get("https://academicinfo.ubbcluj.ro/Note.aspx")
+    grades_resp = session.get("https://academicinfo.ubbcluj.ro/Note.aspx", verify=False)
     soup = BeautifulSoup(grades_resp.content, 'html.parser')
     table = soup.find("table", {"id": "ctl00_ContentPlaceHolder1_gvNote"})
     rows = table.find("tbody").find_all("tr")
