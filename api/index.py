@@ -119,7 +119,7 @@ def solve_captcha(user_id: str, username: str, password: str, captcha_response: 
         "btnLogin": "Log in"
     }
 
-    login_resp = session.post("https://academicinfo.ubbcluj.ro/Default.aspx", data=data,verify=False)
+    login_resp = session.post("https://academicinfo.ubbcluj.ro/Default.aspx", data=data)
     if "Note.aspx" not in login_resp.text and "Note" not in login_resp.url:
         return JSONResponse(content={"error": "Login failed"}, status_code=401)
 
