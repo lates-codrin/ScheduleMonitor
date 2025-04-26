@@ -63,28 +63,23 @@ def start_login(user_id: str):
         session = requests.Session()
         login_url = "https://academicinfo.ubbcluj.ro/Default.aspx"
         
-        # Make the GET request to the login URL
         resp = session.get(login_url, verify=False)
         
-        # Check if request was successful
         if resp.status_code != 200:
             raise HTTPException(status_code=422, detail="Failed to retrieve the login page")
 
         soup = BeautifulSoup(resp.text, 'html.parser')
         
-        # Extract the CAPTCHA sitekey
         recaptcha_div = soup.find("div", class_="g-recaptcha")
         if recaptcha_div:
             sitekey = recaptcha_div.get("data-sitekey")
         else:
-            sitekey = "abc"  # Set a fallback value if no sitekey is found
+            sitekey = "abc"
         
-        # Extract required hidden fields for the login form
         viewstate = soup.find("input", {"name": "__VIEWSTATE"})["value"]
         eventvalidation = soup.find("input", {"name": "__EVENTVALIDATION"})["value"]
         viewstategen = soup.find("input", {"name": "__VIEWSTATEGENERATOR"})["value"]
         
-        # Store session data for later use
         session_store[user_id] = {
             "session": session,
             "viewstate": viewstate,
@@ -92,13 +87,12 @@ def start_login(user_id: str):
             "viewstategen": viewstategen
         }
         
-        # Log the session data for debugging
         print(f"Session data for {user_id}: {session_store[user_id]}")
         
         return JSONResponse(content={"sitekey": sitekey})
 
     except Exception as e:
-        print(f"Error occurred: {str(e)}")  # Log error to the console
+        print(f"Error occurred: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal Server Error: " + str(e))
 
 
@@ -115,7 +109,7 @@ def solve_captcha(user_id: str, username: str, password: str, captcha_response: 
         "__VIEWSTATEGENERATOR": store["viewstategen"],
         "txtUsername": username,
         "txtPassword": password,
-        "g-recaptcha-response": captcha_response,  # jus pass it to the uni
+        "g-recaptcha-response": captcha_response,
         "btnLogin": "Log in"
     }
 
